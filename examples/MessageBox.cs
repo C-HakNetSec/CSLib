@@ -5,7 +5,7 @@ namespace MessageBoxExample
 {
     public class MessageBoxEX
     {
-        public static void install()
+        public static void test()
         {
 
             //initialize Message
