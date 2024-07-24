@@ -2,8 +2,6 @@
 
 CSLib is a versatile C# library that provides a range of utilities for common Windows application tasks, including user interactions, file management, system checks, and configuration.
 
-This library was created by [Mommy](https://github.com/l-mommy-l).
-
 ## Features
 
 - [**MessageBox**](#messagebox): Create and manage message boxes with various options and behaviors.
