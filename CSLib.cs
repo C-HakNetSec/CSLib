@@ -1,129 +1,233 @@
-﻿using System;
+﻿using IWshRuntimeLibrary;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace CSLib
 {
+    /// <summary>
+    /// Represents a message box with various options and behaviors.
+    /// </summary>
     public class MessageBox
     {
-        // Enum for message box buttons
+        /// <summary>
+        /// Enum for message box buttons.
+        /// </summary>
         public enum MessageBoxButtons : UInt64
         {
-            // Abort, Retry, Ignore buttons
+            /// <summary>
+            /// Abort, Retry, Ignore buttons.
+            /// </summary>
             MB_ABORTRETRYIGNORE = 0x00000002L,
-            // Cancel, Try Again, Continue buttons
+            /// <summary>
+            /// Cancel, Try Again, Continue buttons.
+            /// </summary>
             MB_CANCELTRYCONTINUE = 0x00000006L,
-            // Help button
+            /// <summary>
+            /// Help button.
+            /// </summary>
             MB_HELP = 0x00004000L,
-            // OK button
+            /// <summary>
+            /// OK button.
+            /// </summary>
             MB_OK = 0x00000000L,
-            // OK, Cancel buttons
+            /// <summary>
+            /// OK, Cancel buttons.
+            /// </summary>
             MB_OKCANCEL = 0x00000001L,
-            // Retry, Cancel buttons
+            /// <summary>
+            /// Retry, Cancel buttons.
+            /// </summary>
             MB_RETRYCANCEL = 0x00000005L,
-            // Yes, No buttons
+            /// <summary>
+            /// Yes, No buttons.
+            /// </summary>
             MB_YESNO = 0x00000004L,
-            // Yes, No, Cancel buttons
+            /// <summary>
+            /// Yes, No, Cancel buttons.
+            /// </summary>
             MB_YESNOCANCEL = 0x00000003L
         }
 
-        // Enum for message box icons
+        /// <summary>
+        /// Enum for message box icons.
+        /// </summary>
         public enum MessageBoxIcon : UInt64
         {
-            // Warning icon
+            /// <summary>
+            /// Warning icon.
+            /// </summary>
             MB_ICONEXCLAMATION = 0x00000030L,
-            // Warning icon
+            /// <summary>
+            /// Warning icon.
+            /// </summary>
             MB_ICONWARNING = 0x00000030L,
-            // Information icon
+            /// <summary>
+            /// Information icon.
+            /// </summary>
             MB_ICONINFORMATION = 0x00000040L,
-            // Information icon
+            /// <summary>
+            /// Information icon.
+            /// </summary>
             MB_ICONASTERISK = 0x00000040L,
-            // Question mark icon
+            /// <summary>
+            /// Question mark icon.
+            /// </summary>
             MB_ICONQUESTION = 0x00000020L,
-            // Error icon
+            /// <summary>
+            /// Error icon.
+            /// </summary>
             MB_ICONSTOP = 0x00000010L,
-            // Error icon
+            /// <summary>
+            /// Error icon.
+            /// </summary>
             MB_ICONERROR = 0x00000010L,
-            // Error icon
+            /// <summary>
+            /// Error icon.
+            /// </summary>
             MB_ICONHAND = 0x00000010L
         }
 
-        // Enum for default button
+        /// <summary>
+        /// Enum for default button.
+        /// </summary>
         public enum MessageBoxDefaultButton : UInt64
         {
-            // First button is default
+            /// <summary>
+            /// First button is default.
+            /// </summary>
             MB_DEFBUTTON1 = 0x00000000L,
-            // Second button is default
+            /// <summary>
+            /// Second button is default.
+            /// </summary>
             MB_DEFBUTTON2 = 0x00000100L,
-            // Third button is default
+            /// <summary>
+            /// Third button is default.
+            /// </summary>
             MB_DEFBUTTON3 = 0x00000200L,
-            // Fourth button is default
+            /// <summary>
+            /// Fourth button is default.
+            /// </summary>
             MB_DEFBUTTON4 = 0x00000300L
         }
 
-        // Enum for message box modality
+        /// <summary>
+        /// Enum for message box modality.
+        /// </summary>
         public enum MessageBoxModality : UInt64
         {
-            // Application modal
+            /// <summary>
+            /// Application modal.
+            /// </summary>
             MB_APPLMODAL = 0x00000000L,
-            // System modal
+            /// <summary>
+            /// System modal.
+            /// </summary>
             MB_SYSTEMMODAL = 0x00001000L,
-            // Task modal
+            /// <summary>
+            /// Task modal.
+            /// </summary>
             MB_TASKMODAL = 0x00002000L
         }
 
-        // Enum for other message box options
+        /// <summary>
+        /// Enum for other message box options.
+        /// </summary>
         public enum MessageBoxOtherOptions : UInt64
         {
-            // Default desktop only
+            /// <summary>
+            /// Default desktop only.
+            /// </summary>
             MB_DEFAULT_DESKTOP_ONLY = 0x00020000L,
-            // Right-aligned text
+            /// <summary>
+            /// Right-aligned text.
+            /// </summary>
             MB_RIGHT = 0x00080000L,
-            // Right-to-left reading
+            /// <summary>
+            /// Right-to-left reading.
+            /// </summary>
             MB_RTLREADING = 0x00100000L,
-            // Set foreground
+            /// <summary>
+            /// Set foreground.
+            /// </summary>
             MB_SETFOREGROUND = 0x00010000L,
-            // Topmost window
+            /// <summary>
+            /// Topmost window.
+            /// </summary>
             MB_TOPMOST = 0x00040000L,
-            // Service notification
+            /// <summary>
+            /// Service notification.
+            /// </summary>
             MB_SERVICE_NOTIFICATION = 0x00200000L
         }
 
-        // Enum for button clicked
+        /// <summary>
+        /// Enum for button clicked.
+        /// </summary>
         public enum MessageBoxButtonClicked
         {
-            // Abort button clicked
+            /// <summary>
+            /// Abort button clicked.
+            /// </summary>
             IDABORT = 3,
-            // Cancel button clicked
+            /// <summary>
+            /// Cancel button clicked.
+            /// </summary>
             IDCANCEL = 2,
-            // Continue button clicked
+            /// <summary>
+            /// Continue button clicked.
+            /// </summary>
             IDCONTINUE = 11,
-            // Ignore button clicked
+            /// <summary>
+            /// Ignore button clicked.
+            /// </summary>
             IDIGNORE = 5,
-            // No button clicked
+            /// <summary>
+            /// No button clicked.
+            /// </summary>
             IDNO = 7,
-            // OK button clicked
+            /// <summary>
+            /// OK button clicked.
+            /// </summary>
             IDOK = 1,
-            // Retry button clicked
+            /// <summary>
+            /// Retry button clicked.
+            /// </summary>
             IDRETRY = 4,
-            // Try Again button clicked
+            /// <summary>
+            /// Try Again button clicked.
+            /// </summary>
             IDTRYAGAIN = 10,
-            // Yes button clicked
+            /// <summary>
+            /// Yes button clicked.
+            /// </summary>
             IDYES = 6
         }
 
-        // Import the MessageBox function from User32.dll
+        /// <summary>
+        /// Import the MessageBox function from User32.dll.
+        /// </summary>
         [DllImport("User32.dll", SetLastError = true, EntryPoint = "MessageBox")]
         static private extern int MessageBoxImported(IntPtr hWnd, string lpText, string lpCaption, UInt64 uType);
 
-        // Private fields for the message box
+        /// <summary>
+        /// Private fields for the message box.
+        /// </summary>
         private IntPtr WINDOWHANDLE = IntPtr.Zero;
         private string TEXT;
         private string TITLE;
         private UInt64 BEHAVIOR;
         private int RETURNVALUE;
 
-        // Constructor for the message box
+        /// <summary>
+        /// Constructor for the message box.
+        /// </summary>
+        /// <param name="WindowHandle">The handle of the parent window (optional).</param>
+        /// <param name="Text">The text to display in the message box (optional).</param>
+        /// <param name="Title">The title of the message box (optional).</param>
+        /// <param name="Behavior">The behavior of the message box (optional).</param>
         public MessageBox(IntPtr WindowHandle = default, string Text = null, string Title = null, UInt64 Behavior = default)
         {
             WINDOWHANDLE = WindowHandle;
@@ -132,7 +236,10 @@ namespace CSLib
             BEHAVIOR = Behavior;
         }
 
-        // Show themessage box
+        /// <summary>
+        /// Show the message box.
+        /// </summary>
+        /// <returns>The return value of the message box.</returns>
         public int ShowMessageBox()
         {
 
@@ -144,45 +251,194 @@ namespace CSLib
             return Return;
         }
 
-        // Get the button clicked
+        /// <summary>
+        /// Get the button clicked.
+        /// </summary>
+        /// <returns>The ID of the clicked button.</returns>
         public int GetClickedButton()
         {
+            // Check if the user has interacted with the message box
             if (RETURNVALUE == 0)
             {
+                // If not, throw an exception
                 throw new InvalidDataException("User not interacted yet");
-            } 
-            
+            }
+
             else
             {
+                // If the user has interacted, return the ID of the clicked button
                 return RETURNVALUE;
             }
         }
 
+        /// <summary>
+        /// Get the name of the button clicked based on its ID.
+        /// </summary>
+        /// <param name="ButtonId">The ID of the clickedbutton.</param>
+        /// <returns>The name of the clicked button.</returns>
         public static string GetButtonName(int ButtonId)
         {
+            // Use a switch statement to map the button ID to its corresponding name
             switch (ButtonId)
             {
                 case (int)MessageBox.MessageBoxButtonClicked.IDOK:
+                    // Return "OK" for the OK button
                     return "OK";
                 case (int)MessageBox.MessageBoxButtonClicked.IDTRYAGAIN:
+                    // Return "Try Again" for the Try Again button
                     return "Try Again";
                 case (int)MessageBox.MessageBoxButtonClicked.IDRETRY:
+                    // Return "Retry" for the Retry button
                     return "Retry";
                 case (int)MessageBox.MessageBoxButtonClicked.IDABORT:
+                    // Return "Abort" for the Abort button
                     return "Abort";
                 case (int)MessageBox.MessageBoxButtonClicked.IDNO:
+                    // Return "NO" for the No button
                     return "NO";
                 case (int)MessageBox.MessageBoxButtonClicked.IDCANCEL:
+                    // Return "Cancel" for the Cancel button
                     return "Cancel";
                 case (int)MessageBox.MessageBoxButtonClicked.IDCONTINUE:
+                    // Return "Continue" for the Continue button
                     return "Continue";
                 case (int)MessageBox.MessageBoxButtonClicked.IDIGNORE:
+                    // Return "Ignore" for the Ignore button
                     return "Ignore";
                 case (int)MessageBox.MessageBoxButtonClicked.IDYES:
+                    // Return "Yes" for the Yes button
                     return "Yes";
                 default:
+                    // If the button ID is not recognized, throw an exception
                     throw new InvalidDataException("Couldn't find button");
             }
+        }
+    }
+
+    /// <summary>
+    /// Represents a shortcut.
+    /// </summary>
+    public class Shortcut
+    {
+        /// <summary>
+        /// Constructor for creating a new shortcut.
+        /// </summary>
+        /// <param name="shortcutPath">The path where the shortcut will be created.</param>
+        /// <param name="appPath">The path of the application that the shortcut will launch.</param>
+        /// <param name="name">The name of the shortcut.</param>
+        /// <param name="iconPath">The path of the icon for the shortcut.</param>
+        /// <param name="args">The arguments for the shortcut (optional).</param>
+        /// <param name="description">The description of the shortcut (optional).</param>
+        public Shortcut(string shortcutPath, string appPath, string name, string iconPath = null, string args = null, string description = null)
+        {
+            // Create a new instance of the WshShell object
+            WshShell wshShell = new WshShell();
+
+            // Create a new shortcut object at the specified path with the given name
+            IWshShortcut shortcut = wshShell.CreateShortcut($"{shortcutPath}\\{name}.lnk");
+
+            // Set the target path of the shortcut (i.e. the application it will launch)
+            shortcut.TargetPath = appPath;
+
+            // Set the icon location for the shortcut
+            if (iconPath != null && iconPath != "")
+            {
+                shortcut.IconLocation = iconPath;
+            }
+
+            // Set the arguments for the shortcut (optional)
+            shortcut.Arguments = args;
+
+            // Set the description for the shortcut (optional)
+            shortcut.Description = description;
+
+            // Save the shortcut to disk
+            shortcut.Save();
+        }
+    }
+
+    public static class AdminRights
+    {
+        /// <summary>
+        /// Checks if the current user has administrator rights.
+        /// </summary>
+        /// <returns>true if the user has administrator rights, false otherwise.</returns>
+        public static bool CheckIfHasAdminRights()
+        {
+            // Get the current Windows identity
+            WindowsIdentity windowsIdentity = WindowsIdentity.GetCurrent();
+
+            // Create a Windows principal from the identity
+            WindowsPrincipal windowsPrincipal = new WindowsPrincipal(windowsIdentity);
+
+            // Check if the user is in the administrator role
+            return windowsPrincipal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        /// <summary>
+        /// Elevates the current process to run with administrator rights if necessary.
+        /// </summary>
+        public static void GetAdminRights()
+        {
+            // Check if the user already has administrator rights
+            if (!CheckIfHasAdminRights())
+            {
+                // Get the current process
+                Process CurrentProcess = Process.GetCurrentProcess();
+
+                // Get the path of the current process
+                string ProcessPath = CurrentProcess.MainModule.FileName;
+
+                // Create a new process start info
+                ProcessStartInfo startinfo = new ProcessStartInfo(ProcessPath);
+
+                // Set the "runas" verb to elevate the process
+                startinfo.UseShellExecute = true;
+                startinfo.Verb = "runas";
+
+                // Start the new process
+                Process.Start(startinfo);
+
+                // Kill the current process
+                CurrentProcess.Kill();
+            }
+        }
+    }
+
+    /// <summary>
+    /// A static class for managing startup applications.
+    /// </summary>
+    public static class StartupApps
+    {
+        /// <summary>
+        /// Adds an application to the startup folder.
+        /// </summary>
+        /// <param name="path">The path to the application executable.</param>
+        /// <param name="args">Optional command-line arguments for the application.</param>
+        /// <param name="installForAllUsers">If true, installs the application for all users on the system.</param>
+        public static void AddToStartup(string path, string args = "", bool installForAllUsers = false)
+        {
+            // Get the startup folder path
+            string StartupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+
+            // If installing for all users, get admin rights and use the common startup folder
+            if (installForAllUsers)
+            {
+                // Get admin rights (this may prompt the user for elevation)
+                AdminRights.GetAdminRights();
+
+                // Use the common startup folder instead of the user-specific one
+                StartupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
+            }
+
+            // Get the program name from the executable path
+            string ProgramName = Path.GetFileName(path);
+
+            // Remove the file extension from the program name
+            ProgramName = ProgramName.Substring(0, ProgramName.IndexOf("."));
+
+            // Create a new shortcut in the startup folder, including the command-line arguments
+            new Shortcut(StartupFolderPath, path, ProgramName, args: args);
         }
     }
 }
