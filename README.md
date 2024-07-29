@@ -1,16 +1,14 @@
----
-
 # CSLib
 
 CSLib is a C# library providing utilities for creating message boxes, managing shortcuts, checking for admin rights, adding applications to startup, and determining if a process is critical.
 
 ## Features
 
-- **MessageBox**: Display custom message boxes with various options and behaviors.
-- **Shortcut**: Create desktop shortcuts programmatically.
-- **AdminRights**: Check and obtain administrator rights.
-- **StartupApps**: Add applications to the startup folder.
-- **CriticalProcess**: Check if a process is critical.
+- [MessageBox](#messagebox): Display custom message boxes with various options and behaviors.
+- [Shortcut](#shortcut): Create desktop shortcuts programmatically.
+- [AdminRights](#adminrights): Check and obtain administrator rights.
+- [StartupApps](#startupapps): Add applications to the startup folder.
+- [CriticalProcess](#criticalprocess): Check if a process is critical.
 
 ## Installation
 
@@ -209,10 +207,8 @@ Here are some example use cases demonstrating how to use CSLib in your applicati
 
 ## License
 
-This project is licensed under the MIT [License](LICENSE).
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request with your changes.
-
----
