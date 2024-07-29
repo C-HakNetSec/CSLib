@@ -1,208 +1,220 @@
+---
+
 # CSLib
 
-CSLib is a versatile C# library that provides a range of utilities for common Windows application tasks, including user interactions, file management, system checks, and configuration.
+CSLib is a C# library providing utilities for creating message boxes, managing shortcuts, checking for admin rights, adding applications to startup, and determining if a process is critical.
 
 ## Features
 
-- [**MessageBox**](#messagebox): Create and manage message boxes with various options and behaviors.
-- [**Shortcut**](#shortcut): Create and manage application shortcuts with customizable options.
-- [**AdminRights**](#adminrights): Check and request administrative rights.
-- [**StartupApps**](#startupapps): Add applications to the startup folder to run them automatically on system boot.
+- **MessageBox**: Display custom message boxes with various options and behaviors.
+- **Shortcut**: Create desktop shortcuts programmatically.
+- **AdminRights**: Check and obtain administrator rights.
+- **StartupApps**: Add applications to the startup folder.
+- **CriticalProcess**: Check if a process is critical.
 
 ## Installation
 
-You can use CSLib in your project in one of two ways:
+To use CSLib in your project, clone the repository and include the source files in your solution.
 
-### 1. Using the Compiled DLL
-
-1. **Download the Compiled DLL:**
-   - Go to the [Releases](https://github.com/l-mommy-l/CSLib/releases) page of the repository.
-   - Download the latest release zip file.
-   - Extract the `CSLib.dll` file from the zip.
-
-2. **Add Reference:**
-   - **Visual Studio:** 
-     - Right-click on **References** in the Solution Explorer.
-     - Select **Add Reference**.
-     - Browse to the location of `CSLib.dll` and add it to your project.
-   - **Other IDEs:**
-     - Open your project's properties or settings.
-     - Look for an option to add references or assemblies.
-     - Browse to the `CSLib.dll` file and add it to your project.
-
-### 2. Using the Source Code
-
-1. **Download the Source Code:**
-   - Clone or download the repository from [GitHub](https://github.com/l-mommy-l/CSLib).
-
-2. **Add Files to Your Project:**
-   - Add the `CSLib.cs` file to your project.
-
-3. **Compile Your Project:**
-   - Build your project to integrate CSLib into your application.
+```bash
+git clone https://github.com/l-mommy-l/CSLib.git
+```
 
 ## Usage
 
 ### MessageBox
 
-The `MessageBox` class provides methods to create and display message boxes with customizable buttons, icons, and behaviors.
+The `MessageBox` class allows you to create and display message boxes with various button and icon configurations.
+
+#### Enums
+
+- `MessageBoxButtons`: Defines the buttons displayed in the message box.
+  - `MB_ABORTRETRYIGNORE`: Abort, Retry, Ignore buttons.
+  - `MB_CANCELTRYCONTINUE`: Cancel, Try Again, Continue buttons.
+  - `MB_HELP`: Help button.
+  - `MB_OK`: OK button.
+  - `MB_OKCANCEL`: OK, Cancel buttons.
+  - `MB_RETRYCANCEL`: Retry, Cancel buttons.
+  - `MB_YESNO`: Yes, No buttons.
+  - `MB_YESNOCANCEL`: Yes, No, Cancel buttons.
+
+- `MessageBoxIcon`: Defines the icons displayed in the message box.
+  - `MB_ICONEXCLAMATION`: Warning icon.
+  - `MB_ICONWARNING`: Warning icon.
+  - `MB_ICONINFORMATION`: Information icon.
+  - `MB_ICONASTERISK`: Information icon.
+  - `MB_ICONQUESTION`: Question mark icon.
+  - `MB_ICONSTOP`: Error icon.
+  - `MB_ICONERROR`: Error icon.
+  - `MB_ICONHAND`: Error icon.
+
+- `MessageBoxDefaultButton`: Defines the default button selected in the message box.
+  - `MB_DEFBUTTON1`: First button is default.
+  - `MB_DEFBUTTON2`: Second button is default.
+  - `MB_DEFBUTTON3`: Third button is default.
+  - `MB_DEFBUTTON4`: Fourth button is default.
+
+- `MessageBoxModality`: Defines the modality of the message box.
+  - `MB_APPLMODAL`: Application modal.
+  - `MB_SYSTEMMODAL`: System modal.
+  - `MB_TASKMODAL`: Task modal.
+
+- `MessageBoxOtherOptions`: Defines other options for the message box.
+  - `MB_DEFAULT_DESKTOP_ONLY`: Default desktop only.
+  - `MB_RIGHT`: Right-aligned text.
+  - `MB_RTLREADING`: Right-to-left reading.
+  - `MB_SETFOREGROUND`: Set foreground.
+  - `MB_TOPMOST`: Topmost window.
+  - `MB_SERVICE_NOTIFICATION`: Service notification.
+
+- `MessageBoxButtonClicked`: Defines the button clicked by the user.
+  - `IDABORT`: Abort button clicked.
+  - `IDCANCEL`: Cancel button clicked.
+  - `IDCONTINUE`: Continue button clicked.
+  - `IDIGNORE`: Ignore button clicked.
+  - `IDNO`: No button clicked.
+  - `IDOK`: OK button clicked.
+  - `IDRETRY`: Retry button clicked.
+  - `IDTRYAGAIN`: Try Again button clicked.
+  - `IDYES`: Yes button clicked.
 
 #### Example
 
 ```csharp
 using CSLib;
 
-class Program
-{
-    static void Main()
-    {
-        // Create an instance of the MessageBox class
-        MessageBox msgBox = new MessageBox(
-            WindowHandle: IntPtr.Zero, // Handle of the parent window (or IntPtr.Zero if no parent)
-            Text: "Hello, World!", // Text to display in the message box (default is null)
-            Title: "My MessageBox", // Title of the message box (default is null)
-            Behavior: (ulong)MessageBox.MessageBoxButtons.MB_OK | // Button options (e.g., OK button)
-                      (ulong)MessageBox.MessageBoxIcon.MB_ICONINFORMATION // Icon options (e.g., Information icon)
-        );
-
-        // Show the message box and get the user's response
-        int result = msgBox.ShowMessageBox();
-
-        // Convert the result to a readable button name
-        string buttonClicked = MessageBox.GetButtonName(result);
-
-        // Print the name of the clicked button
-        Console.WriteLine($"Button clicked: {buttonClicked}");
-    }
-}
+MessageBox messageBox = new MessageBox(IntPtr.Zero, "Hello, World!", "Greeting", (ulong)MessageBox.MessageBoxIcon.MB_ICONINFORMATION | (ulong)MessageBox.MessageBoxButtons.MB_OK);
+int result = messageBox.ShowMessageBox();
+string buttonName = MessageBox.GetButtonName(result);
+Console.WriteLine($"Clicked button: {buttonName}");
 ```
-
-- **Constructor Parameters:**
-  - `WindowHandle` (optional): The handle of the parent window. Use `IntPtr.Zero` if no parent window is needed.
-  - `Text` (optional, default is `null`): The message text displayed in the message box.
-  - `Title` (optional, default is `null`): The title of the message box window.
-  - `Behavior`: A combination of options that define the buttons, icon, default button, modality, and other features of the message box. No default value.
-
-- **Methods:**
-  - `ShowMessageBox()`: Displays the message box and returns the ID of the button clicked by the user.
-  - `GetClickedButton()`: Retrieves the ID of the button that was clicked. Throws an `InvalidDataException` if the message box has not been interacted with yet.
-  - `GetButtonName(int ButtonId)`: Converts the button ID into a human-readable string representation.
 
 ### Shortcut
 
-The `Shortcut` class allows you to create shortcuts to applications, specifying target paths, icons, arguments, and descriptions.
+The `Shortcut` class allows you to create shortcuts to applications with optional arguments and descriptions.
+
+#### Constructor
+
+- `Shortcut(string shortcutPath, string appPath, string name, string iconPath = null, string args = null, string description = null)`: Creates a new shortcut.
+  - `shortcutPath`: The path where the shortcut will be created.
+  - `appPath`: The path of the application that the shortcut will launch.
+  - `name`: The name of the shortcut.
+  - `iconPath`: The path of the icon for the shortcut (optional).
+  - `args`: The arguments for the shortcut (optional).
+  - `description`: The description of the shortcut (optional).
 
 #### Example
 
 ```csharp
 using CSLib;
 
-class Program
-{
-    static void Main()
-    {
-        // Define the path for the shortcut (e.g., Desktop)
-        string shortcutPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
-        // Path to the application executable
-        string appPath = @"C:\Path\To\Application.exe";
-
-        // Name of the shortcut
-        string name = "MyApp";
-
-        // Path to the icon file (optional, default is null)
-        string iconPath = @"C:\Path\To\Icon.ico";
-
-        // Command-line arguments for the application (optional, default is null)
-        string args = "-someArgument";
-
-        // Description for the shortcut (optional, default is null)
-        string description = "My Application Shortcut";
-
-        // Create the shortcut
-        Shortcut shortcut = new Shortcut(shortcutPath, appPath, name, iconPath, args, description);
-    }
-}
+// Create a shortcut on the desktop
+Shortcut shortcut = new Shortcut(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), @"C:\Path\To\Application.exe", "MyApp", @"C:\Path\To\Icon.ico");
 ```
-
-- **Constructor Parameters:**
-  - `shortcutPath`: The folder where the shortcut will be created (e.g., Desktop).
-  - `appPath`: The path to the application executable that the shortcut will launch.
-  - `name`: The name of the shortcut.
-  - `iconPath` (optional, default is `null`): The path to the icon file for the shortcut.
-  - `args` (optional, default is `null`): Command-line arguments for the application.
-  - `description` (optional, default is `null`): Description text for the shortcut.
 
 ### AdminRights
 
-The `AdminRights` class provides methods to check for and request administrative rights for the current user.
+The `AdminRights` class provides methods to check and obtain administrator rights for the current process.
 
-#### Example
+#### CheckIfHasAdminRights
+
+Check if the current user has administrator rights.
 
 ```csharp
 using CSLib;
 
-class Program
-{
-    static void Main()
-    {
-        // Check if the current user has administrative rights
-        if (!AdminRights.CheckIfHasAdminRights())
-        {
-            // Request administrative rights if not already granted
-            AdminRights.GetAdminRights();
-        }
-        else
-        {
-            // Notify the user if administrative rights are already granted
-            Console.WriteLine("You already have administrative rights.");
-        }
-    }
-}
+// Check if the current user has admin rights
+bool isAdmin = AdminRights.CheckIfHasAdminRights();
+Console.WriteLine($"Is admin: {isAdmin}");
 ```
 
-- **Methods:**
-  - `CheckIfHasAdminRights()`: Checks if the current user has administrative rights and returns `true` or `false`.
-  - `GetAdminRights()`: Attempts to elevate the current process to run with administrative rights if the user does not already have them. Prompts the user for elevation if needed.
+#### GetAdminRights
+
+Elevate the current process to run with administrator rights.
+
+```csharp
+using CSLib;
+
+// Elevate the current process to run with admin rights
+AdminRights.GetAdminRights();
+```
+
+#### EnsureAdminRights
+
+Ensure that the application has administrator rights before proceeding. If the application does not have admin rights, it will prompt the user to retry or cancel.
+
+```csharp
+using CSLib;
+
+try
+{
+    AdminRights.EnsureAdminRights("performing this operation", "Please grant admin rights to continue.");
+}
+catch (OperationCanceledException ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
 
 ### StartupApps
 
-The `StartupApps` class helps add applications to the startup folder, so they automatically run when the system boots.
+The `StartupApps` class provides a method to add applications to the startup folder, allowing them to run at system startup.
 
-#### Example
+#### AddToStartup
+
+Add an application to the startup folder.
 
 ```csharp
 using CSLib;
 
-class Program
-{
-    static void Main()
-    {
-        // Path to the application executable
-        string appPath = @"C:\Path\To\Application.exe";
-
-        // Command-line arguments for the application (optional, default is null)
-        string args = "-someArgument";
-
-        // If true, install for all users; otherwise, install only for the current user (optional, default is false)
-        bool installForAllUsers = true;
-
-        // Add the application to the startup folder
-        StartupApps.AddToStartup(appPath, args, installForAllUsers);
-    }
-}
+// Add an application to the startup folder
+StartupApps.AddToStartup(@"C:\Path\To\Application.exe", args: "--silent", installForAllUsers: true);
 ```
 
-- **Methods:**
-  - `AddToStartup(string path, string args = "", bool installForAllUsers = false)`: Adds the specified application to the startup folder.
-    - `path`: The path to the application executable.
-    - `args` (optional, default is `""`): Command-line arguments for the application.
-    - `installForAllUsers` (optional, default is `false`): If `true`, the application is added to the common startup folder for all users; if `false`, it is added to the startup folder for the current user only.
+- `path`: The path to the application executable.
+- `args`: Optional command-line arguments for the application.
+- `installForAllUsers`: If true, installs the application for all users on the system.
+
+### CriticalProcess
+
+The `CriticalProcess` class provides functionality to check if a specific process is critical.
+
+#### IsCritical
+
+Check if a process is critical.
+
+```csharp
+using CSLib;
+using System.Diagnostics;
+
+// Check if a process is critical
+Process process = Process.GetProcessesByName("explorer")[0];
+bool isCritical = CriticalProcess.IsCritical(process);
+Console.WriteLine($"Is critical: {isCritical}");
+```
+
+## Examples
+
+Here are some example use cases demonstrating how to use CSLib in your applications.
+
+- [MessageBox Example](examples/MessageBoxExample.cs)
+- [Shortcut Example](examples/ShortcutExample.cs)
+- [AdminRights Example](examples/AdminRightsExample.cs)
+- [StartupApps Example](examples/StartupAppsExample.cs)
+- [CriticalProcess Example](examples/CriticalProcessExample.cs)
+
+## Links
+
+- [My GitHub Profile](https://github.com/l-mommy-l)
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
-## Author
+## Contributing
 
-CSLib is created by [Mommy](https://github.com/l-mommy-l).
+Contributions are welcome! Please fork the repository and submit a pull request with your changes.
+
+---
+
+This README now includes detailed explanations and examples for each class and method in your CSLib library.
