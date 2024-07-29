@@ -26,16 +26,57 @@ git clone https://github.com/l-mommy-l/CSLib.git
 
 The `MessageBox` class allows you to create and display message boxes with various button and icon configurations.
 
-- **[MessageBox Class](#messagebox-class)**
-
 #### Enums
 
-- [MessageBoxButtons](#messageboxbuttons)
-- [MessageBoxIcon](#messageboxicon)
-- [MessageBoxDefaultButton](#messageboxdefaultbutton)
-- [MessageBoxModality](#messageboxmodality)
-- [MessageBoxOtherOptions](#messageboxotheroptions)
-- [MessageBoxButtonClicked](#messageboxbuttonclicked)
+- `MessageBoxButtons`: Defines the buttons displayed in the message box.
+  - `MB_ABORTRETRYIGNORE`: Abort, Retry, Ignore buttons.
+  - `MB_CANCELTRYCONTINUE`: Cancel, Try Again, Continue buttons.
+  - `MB_HELP`: Help button.
+  - `MB_OK`: OK button.
+  - `MB_OKCANCEL`: OK, Cancel buttons.
+  - `MB_RETRYCANCEL`: Retry, Cancel buttons.
+  - `MB_YESNO`: Yes, No buttons.
+  - `MB_YESNOCANCEL`: Yes, No, Cancel buttons.
+
+- `MessageBoxIcon`: Defines the icons displayed in the message box.
+  - `MB_ICONEXCLAMATION`: Warning icon.
+  - `MB_ICONWARNING`: Warning icon.
+  - `MB_ICONINFORMATION`: Information icon.
+  - `MB_ICONASTERISK`: Information icon.
+  - `MB_ICONQUESTION`: Question mark icon.
+  - `MB_ICONSTOP`: Error icon.
+  - `MB_ICONERROR`: Error icon.
+  - `MB_ICONHAND`: Error icon.
+
+- `MessageBoxDefaultButton`: Defines the default button selected in the message box.
+  - `MB_DEFBUTTON1`: First button is default.
+  - `MB_DEFBUTTON2`: Second button is default.
+  - `MB_DEFBUTTON3`: Third button is default.
+  - `MB_DEFBUTTON4`: Fourth button is default.
+
+- `MessageBoxModality`: Defines the modality of the message box.
+  - `MB_APPLMODAL`: Application modal.
+  - `MB_SYSTEMMODAL`: System modal.
+  - `MB_TASKMODAL`: Task modal.
+
+- `MessageBoxOtherOptions`: Defines other options for the message box.
+  - `MB_DEFAULT_DESKTOP_ONLY`: Default desktop only.
+  - `MB_RIGHT`: Right-aligned text.
+  - `MB_RTLREADING`: Right-to-left reading.
+  - `MB_SETFOREGROUND`: Set foreground.
+  - `MB_TOPMOST`: Topmost window.
+  - `MB_SERVICE_NOTIFICATION`: Service notification.
+
+- `MessageBoxButtonClicked`: Defines the button clicked by the user.
+  - `IDABORT`: Abort button clicked.
+  - `IDCANCEL`: Cancel button clicked.
+  - `IDCONTINUE`: Continue button clicked.
+  - `IDIGNORE`: Ignore button clicked.
+  - `IDNO`: No button clicked.
+  - `IDOK`: OK button clicked.
+  - `IDRETRY`: Retry button clicked.
+  - `IDTRYAGAIN`: Try Again button clicked.
+  - `IDYES`: Yes button clicked.
 
 #### Example
 
@@ -52,11 +93,15 @@ Console.WriteLine($"Clicked button: {buttonName}");
 
 The `Shortcut` class allows you to create shortcuts to applications with optional arguments and descriptions.
 
-- **[Shortcut Class](#shortcut-class)**
-
 #### Constructor
 
-- [Shortcut Constructor](#shortcut-constructor)
+- `Shortcut(string shortcutPath, string appPath, string name, string iconPath = null, string args = null, string description = null)`: Creates a new shortcut.
+  - `shortcutPath`: The path where the shortcut will be created.
+  - `appPath`: The path of the application that the shortcut will launch.
+  - `name`: The name of the shortcut.
+  - `iconPath`: The path of the icon for the shortcut (optional).
+  - `args`: The arguments for the shortcut (optional).
+  - `description`: The description of the shortcut (optional).
 
 #### Example
 
@@ -71,21 +116,32 @@ Shortcut shortcut = new Shortcut(Environment.GetFolderPath(Environment.SpecialFo
 
 The `AdminRights` class provides methods to check and obtain administrator rights for the current process.
 
-- **[AdminRights Class](#adminrights-class)**
-
 #### CheckIfHasAdminRights
 
-- [CheckIfHasAdminRights Method](#checkifhasadminrights)
+Check if the current user has administrator rights.
+
+```csharp
+using CSLib;
+
+// Check if the current user has admin rights
+bool isAdmin = AdminRights.CheckIfHasAdminRights();
+Console.WriteLine($"Is admin: {isAdmin}");
+```
 
 #### GetAdminRights
 
-- [GetAdminRights Method](#getadminrights)
+Elevate the current process to run with administrator rights.
+
+```csharp
+using CSLib;
+
+// Elevate the current process to run with admin rights
+AdminRights.GetAdminRights();
+```
 
 #### EnsureAdminRights
 
-- [EnsureAdminRights Method](#ensureadminrights)
-
-#### Example
+Ensure that the application has administrator rights before proceeding. If the application does not have admin rights, it will prompt the user to retry or cancel.
 
 ```csharp
 using CSLib;
@@ -104,13 +160,9 @@ catch (OperationCanceledException ex)
 
 The `StartupApps` class provides a method to add applications to the startup folder, allowing them to run at system startup.
 
-- **[StartupApps Class](#startupapps-class)**
-
 #### AddToStartup
 
-- [AddToStartup Method](#addtostartup)
-
-#### Example
+Add an application to the startup folder.
 
 ```csharp
 using CSLib;
@@ -119,17 +171,17 @@ using CSLib;
 StartupApps.AddToStartup(@"C:\Path\To\Application.exe", args: "--silent", installForAllUsers: true);
 ```
 
+- `path`: The path to the application executable.
+- `args`: Optional command-line arguments for the application.
+- `installForAllUsers`: If true, installs the application for all users on the system.
+
 ### CriticalProcess
 
 The `CriticalProcess` class provides functionality to check if a specific process is critical.
 
-- **[CriticalProcess Class](#criticalprocess-class)**
-
 #### IsCritical
 
-- [IsCritical Method](#iscritical)
-
-#### Example
+Check if a process is critical.
 
 ```csharp
 using CSLib;
@@ -157,7 +209,7 @@ Here are some example use cases demonstrating how to use CSLib in your applicati
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT [License](LICENSE).
 
 ## Contributing
 
