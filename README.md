@@ -209,7 +209,7 @@ Here are some example use cases demonstrating how to use CSLib in your applicati
 
 ## License
 
-This project is licensed under the MIT License.
+[This project is licensed under the MIT License](LICENSE).
 
 ## Contributing
 
