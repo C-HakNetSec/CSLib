@@ -1,9 +1,13 @@
 ﻿using IWshRuntimeLibrary;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 
 namespace CSLib
 {
@@ -252,23 +256,20 @@ namespace CSLib
         }
 
         /// <summary>
-        /// Get the button clicked.
+        /// Retrieves the ID of the button clicked by the user.
         /// </summary>
         /// <returns>The ID of the clicked button.</returns>
         public int GetClickedButton()
         {
-            // Check if the user has interacted with the message box
-            if (RETURNVALUE == 0)
+            // Wait for the user to click a button, polling every 100ms
+            while (RETURNVALUE == 0)
             {
-                // If not, throw an exception
-                throw new InvalidDataException("User not interacted yet");
+                // Pause execution for 100ms to avoid busy-waiting
+                Thread.Sleep(100);
             }
 
-            else
-            {
-                // If the user has interacted, return the ID of the clicked button
-                return RETURNVALUE;
-            }
+            // Return the ID of the button clicked by the user
+            return RETURNVALUE;
         }
 
         /// <summary>
@@ -403,6 +404,55 @@ namespace CSLib
                 CurrentProcess.Kill();
             }
         }
+
+        /// <summary>
+        /// Ensures that the application has administrator rights before proceeding.
+        /// If the application does not have admin rights, it will prompt the user to retry or cancel.
+        /// </summary>
+        /// <param name="Errortext">Optional text to include in the error message when the user cancels.</param>
+        /// <param name="MessageBoxText">Optional text to include in the message box displayed to the user.</param>
+        public static void EnsureAdminRights(string Errortext = "", string MessageBoxText = "")
+        {
+            // Loop until admin rights are confirmed or the user cancels
+            while (true)
+            {
+                // Check if the current process has administrator rights
+                if (!AdminRights.CheckIfHasAdminRights())
+                {
+                    // Display a message box to inform the user of missing admin permissions
+                    // Create a message box with an error icon and retry/cancel buttons
+                    MessageBox messageBox = new MessageBox(
+                        IntPtr.Zero,
+                        $"Missing admin permissions. {MessageBoxText}",
+                        "Missing permissions",
+                        (ulong)MessageBox.MessageBoxIcon.MB_ICONERROR | (ulong)MessageBox.MessageBoxButtons.MB_RETRYCANCEL
+                    );
+
+                    // Show the message box to the user
+                    messageBox.ShowMessageBox();
+
+                    // Get the button that the user clicked
+                    int clickedButton = messageBox.GetClickedButton();
+
+                    // Handle the user's response
+                    if (clickedButton == (int)MessageBox.MessageBoxButtonClicked.IDCANCEL)
+                    {
+                        // Abort the operation if the user chooses to cancel
+                        throw new OperationCanceledException($"User aborted {Errortext}");
+                    }
+                    else if (clickedButton == (int)MessageBox.MessageBoxButtonClicked.IDRETRY)
+                    {
+                        // Retry checking for admin rights if the user chooses to retry
+                        continue;
+                    }
+                }
+                else
+                {
+                    // Break out of the loop if admin rights are confirmed
+                    break;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -418,27 +468,75 @@ namespace CSLib
         /// <param name="installForAllUsers">If true, installs the application for all users on the system.</param>
         public static void AddToStartup(string path, string args = "", bool installForAllUsers = false)
         {
-            // Get the startup folder path
-            string StartupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+            // Get the startup folder path for the current user
+            string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
 
-            // If installing for all users, get admin rights and use the common startup folder
+            // Extract the program name from the executable path
+            string programName = Path.GetFileName(path);
+
+            // If installing for all users, ensure admin rights and use the common startup folder
             if (installForAllUsers)
             {
-                // Get admin rights (this may prompt the user for elevation)
-                AdminRights.GetAdminRights();
+                // Ensure that user has admin rights
+                AdminRights.EnsureAdminRights($"adding {programName} to startup");
 
-                // Use the common startup folder instead of the user-specific one
-                StartupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
+                // Use the common startup folder for all users if admin rights are available
+                startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup);
             }
 
-            // Get the program name from the executable path
-            string ProgramName = Path.GetFileName(path);
-
             // Remove the file extension from the program name
-            ProgramName = ProgramName.Substring(0, ProgramName.IndexOf("."));
+            programName = programName.Substring(0, programName.IndexOf("."));
 
             // Create a new shortcut in the startup folder, including the command-line arguments
-            new Shortcut(StartupFolderPath, path, ProgramName, args: args);
+            new Shortcut(startupFolderPath, path, programName, args: args);
+        }
+    }
+
+    /// <summary>
+    /// A class that provides functionality to check if a process is critical.
+    /// </summary>
+    public class CriticalProcess
+    {
+        // Import the IsProcessCritical function from kernel32.dll
+        [DllImport("kernel32.dll", SetLastError = true, EntryPoint = "IsProcessCritical")]
+        private static extern bool IsProcessCriticalImported(IntPtr hProcess, out bool Critical);
+
+        // Check if a process is critical
+        public static bool IsCritical(Process process)
+        {
+            // Ensure that user has admin rights
+            AdminRights.EnsureAdminRights("checking if process is critical");
+
+            // Check if the process is null
+            if (process == null)
+            {
+                // Display an error message if the process is null
+                MessageBox messageBox = new MessageBox(IntPtr.Zero, "Process doesn't exist", "Error", (ulong)MessageBox.MessageBoxIcon.MB_ICONERROR | (ulong)MessageBox.MessageBoxButtons.MB_OK);
+                messageBox.ShowMessageBox();
+
+                return false;
+            }
+
+            // Call the IsProcessCriticalImported function to check if the process is critical
+            bool result;
+            bool error = IsProcessCriticalImported(process.Handle, out result);
+
+            // Check if an error occurred when calling IsProcessCriticalImported
+            if (error == false)
+            {
+                // Get the error code from the last Win32 error
+                int errorCode = Marshal.GetLastWin32Error();
+
+                // Display an error message with the error code
+                MessageBox messageBox = new MessageBox(IntPtr.Zero, $"Error {errorCode} occured when trying to get info about process", "Error", (ulong)MessageBox.MessageBoxIcon.MB_ICONERROR | (ulong)MessageBox.MessageBoxButtons.MB_OK);
+                messageBox.ShowMessageBox();
+
+                // Throw a Win32Exception with the error code
+                throw new Win32Exception($"Error {errorCode} occured when trying to get info about process");
+            }
+
+            // Return the result of the IsProcessCriticalImported function
+            return result;
         }
     }
 }
